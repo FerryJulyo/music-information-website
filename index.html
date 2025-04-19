@@ -95,7 +95,7 @@
   <h1>Cari Lagu</h1>
 
   <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Masukkan judul lagu atau nama artis..." />
+    <input type="text" id="searchInput" placeholder="Masukkan judul lagu..." />
     <button onclick="search()">Cari</button>
   </div>
 
@@ -108,7 +108,7 @@
       resultsDiv.innerHTML = "";
 
       if (query === "") {
-        resultsDiv.innerHTML = "<p style='text-align:center;'>Silakan masukkan judul lagu atau nama artis.</p>";
+        resultsDiv.innerHTML = "<p style='text-align:center;'>Silakan masukkan judul lagu.</p>";
         return;
       }
 
