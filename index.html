@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,7 +34,8 @@
       justify-content: center;
     }
 
-    input, button {
+    input,
+    button {
       font-size: 16px;
       padding: 10px 15px;
       border-radius: 10px;
@@ -69,7 +71,7 @@
       border-radius: 15px;
       padding: 15px;
       margin-bottom: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
       opacity: 0;
       transform: translateY(20px);
       animation: fadeIn 0.5s ease forwards;
@@ -103,30 +105,40 @@
     /* Modal */
     .modal {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.6);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      /* Lebih gelap */
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 9999;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     .modal-content {
       background: #fff;
       color: #333;
-      padding: 30px;
+      padding: 20px;
       border-radius: 15px;
-      max-width: 500px;
-      width: 90%;
+      width: 100%;
+      max-width: 800px;
+      max-height: 100%;
+      overflow-y: auto;
       position: relative;
       animation: fadeIn 0.3s ease;
+      box-sizing: border-box;
     }
 
     .modal-content img {
-      width: 100%;
+      width: 200px;
+      height: auto;
       border-radius: 10px;
-      margin-bottom: 20px;
+      display: block;
+      margin: 0 auto 20px;
     }
 
     .modal-content h2 {
@@ -155,6 +167,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <h1>Cari Lagu</h1>
@@ -246,4 +259,5 @@
   </script>
 
 </body>
+
 </html>
