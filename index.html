@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pencarian Lagu / Penyanyi</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cari Lagu atau Penyanyi</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
   <style>
     body {
@@ -27,7 +27,6 @@
       background: #ffffff10;
       border-radius: 20px;
       padding: 30px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -71,6 +70,7 @@
       padding: 15px;
       margin-bottom: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      cursor: pointer;
       transition: transform 0.2s;
     }
 
@@ -90,23 +90,48 @@
       flex: 1;
     }
 
-    .info strong {
-      font-size: 1.2em;
-    }
-
     audio {
       width: 100%;
       margin-top: 5px;
     }
 
-    @media (max-width: 600px) {
-      .card {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .card img {
-        margin-bottom: 10px;
-      }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: white;
+      color: #333;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-content img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+
+    .close {
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      font-size: 20px;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -125,18 +150,34 @@
 
   <div id="results" class="results"></div>
 
+  <!-- Modal -->
+  <div id="artistModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img id="artistImage" src="" alt="Foto Penyanyi" />
+      <h2 id="artistName"></h2>
+      <p><strong>Genre:</strong> <span id="artistGenre"></span></p>
+      <p><strong>Jumlah Lagu Tersedia:</strong> <span id="trackCount"></span></p>
+      <p><strong>Contoh Lagu:</strong><br><span id="sampleTracks"></span></p>
+    </div>
+  </div>
+
   <script>
     function search() {
       const query = document.getElementById("searchInput").value.trim();
       const type = document.getElementById("searchType").value;
       const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
 
-      if (query === '') {
+      if (query === "") {
         resultsDiv.innerHTML = "<p style='text-align:center;'>Silakan masukkan kata kunci.</p>";
         return;
       }
 
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=${type}&limit=10`;
+      const isArtistSearch = (type === "musicArtist");
+
+      // Pakai musicTrack agar dapat artwork saat cari penyanyi
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=musicTrack&limit=25`;
 
       fetch(url)
         .then(res => res.json())
@@ -148,11 +189,45 @@
             return;
           }
 
-          data.results.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "card";
+          let filtered = data.results;
 
-            if (type === "musicTrack") {
+          if (isArtistSearch) {
+            const artistMap = new Map();
+
+            data.results.forEach(item => {
+              if (!artistMap.has(item.artistId)) {
+                artistMap.set(item.artistId, {
+                  name: item.artistName,
+                  id: item.artistId,
+                  genre: item.primaryGenreName,
+                  artwork: item.artworkUrl100,
+                  tracks: [item.trackName]
+                });
+              } else {
+                artistMap.get(item.artistId).tracks.push(item.trackName);
+              }
+            });
+
+            artistMap.forEach(artist => {
+              const card = document.createElement("div");
+              card.className = "card";
+              card.onclick = () => showModal(artist);
+
+              card.innerHTML = `
+                <img src="${artist.artwork}" alt="artist" />
+                <div class="info">
+                  <strong>${artist.name}</strong><br/>
+                  Genre: ${artist.genre || 'Tidak diketahui'}
+                </div>
+              `;
+              resultsDiv.appendChild(card);
+            });
+
+          } else {
+            filtered.forEach(item => {
+              const card = document.createElement("div");
+              card.className = "card";
+
               card.innerHTML = `
                 <img src="${item.artworkUrl100}" alt="cover">
                 <div class="info">
@@ -162,20 +237,25 @@
                   <audio controls src="${item.previewUrl}"></audio>
                 </div>
               `;
-            } else {
-              card.innerHTML = `
-                <div class="info">
-                  <strong>${item.artistName}</strong><br/>
-                  ID Artis: ${item.artistId}<br/>
-                  Genre: ${item.primaryGenreName || 'Tidak tersedia'}
-                </div>
-              `;
-            }
-
-            resultsDiv.appendChild(card);
-          });
+              resultsDiv.appendChild(card);
+            });
+          }
         });
     }
+
+    function showModal(artist) {
+      document.getElementById("artistModal").style.display = "flex";
+      document.getElementById("artistImage").src = artist.artwork;
+      document.getElementById("artistName").textContent = artist.name;
+      document.getElementById("artistGenre").textContent = artist.genre || "Tidak diketahui";
+      document.getElementById("trackCount").textContent = artist.tracks.length;
+      document.getElementById("sampleTracks").innerHTML = artist.tracks.slice(0, 3).map(t => `<li>${t}</li>`).join('');
+    }
+
+    function closeModal() {
+      document.getElementById("artistModal").style.display = "none";
+    }
   </script>
+
 </body>
 </html>
